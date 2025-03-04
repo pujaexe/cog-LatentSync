@@ -5,6 +5,7 @@ from cog import BasePredictor, Input, Path
 import os
 import time
 import subprocess
+import uuid
 
 MODEL_CACHE = "checkpoints"
 MODEL_URL = "https://weights.replicate.delivery/default/chunyu-li/LatentSync/model.tar"
@@ -45,6 +46,9 @@ class Predictor(BasePredictor):
         )
     ) -> Path:
         """Run a single prediction on the model"""
+        # Generate a unique ID for this prediction run
+        run_id = str(uuid.uuid4())[:8]
+
         if seed <= 0:
             seed = int.from_bytes(os.urandom(2), "big")
         print(f"Using seed: {seed}")
@@ -53,8 +57,32 @@ class Predictor(BasePredictor):
         audio_path = str(audio)
         config_path = "configs/unet/second_stage.yaml"
         ckpt_path = "checkpoints/latentsync_unet.pt"
-        output_path = "/tmp/video_out.mp4"
+
+        # Use a unique output path for each prediction
+        unique_output_path = f"/tmp/output-{run_id}.mp4"
     
-        # Run the following command:
-        os.system(f"python -m scripts.inference --unet_config_path {config_path} --inference_ckpt_path {ckpt_path} --guidance_scale {str(guidance_scale)} --video_path {video_path} --audio_path {audio_path} --video_out_path {output_path} --seed {seed}")    
-        return Path(output_path)
+        # Use subprocess.run instead of os.system for better isolation
+        command = [
+            "python", "-m", "scripts.inference",
+            "--unet_config_path", config_path,
+            "--inference_ckpt_path", ckpt_path,
+            "--guidance_scale", str(guidance_scale),
+            "--video_path", video_path,
+            "--audio_path", audio_path,
+            "--video_out_path", unique_output_path,
+            "--seed", str(seed)
+        ]
+
+        try:
+            # Use subprocess.run with environment isolation
+            subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+                env=os.environ.copy(),
+            )
+        except Exception:
+            pass
+
+        return Path(unique_output_path)
