@@ -6,6 +6,7 @@ import os
 import time
 import subprocess
 import uuid
+import sys
 
 MODEL_CACHE = "checkpoints"
 MODEL_URL = "https://weights.replicate.delivery/default/chunyu-li/LatentSync/model.tar"
@@ -60,7 +61,15 @@ class Predictor(BasePredictor):
 
         # Use a unique output path for each prediction
         unique_output_path = f"/tmp/output-{run_id}.mp4"
-    
+
+        # Check video before processing - simple test to verify it's a valid video
+        try:
+            test_cmd = ["ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "csv=p=0", video_path]
+            video_info = subprocess.run(test_cmd, capture_output=True, text=True, check=True)
+            print(f"Video info: {video_info.stdout.strip()}")
+        except subprocess.CalledProcessError:
+            raise ValueError(f"Invalid or corrupted video file: {video_path}")
+
         # Use subprocess.run instead of os.system for better isolation
         command = [
             "python", "-m", "scripts.inference",
@@ -74,15 +83,35 @@ class Predictor(BasePredictor):
         ]
 
         try:
-            # Use subprocess.run with environment isolation
-            subprocess.run(
+            # Run the process and capture output
+            process = subprocess.run(
                 command,
                 capture_output=True,
                 text=True,
-                check=False,
+                check=True,  # Raise exception on non-zero exit
                 env=os.environ.copy(),
             )
-        except Exception:
-            pass
+            # Print stdout and stderr for debugging
+            print(process.stdout)
+            if process.stderr:
+                print(f"STDERR: {process.stderr}", file=sys.stderr)
+                
+        except subprocess.CalledProcessError as e:
+            print(f"Command failed with exit code {e.returncode}")
+            print(f"STDOUT: {e.stdout}")
+            print(f"STDERR: {e.stderr}", file=sys.stderr)
+            raise Exception(f"Lipsync generation failed: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {str(e)}")
+            raise
+        
+
+        # Verify output file exists
+        if not os.path.exists(unique_output_path):
+            raise Exception(f"Output file was not created: {unique_output_path}")
+            
+        # Optionally check file size to ensure it's not empty
+        if os.path.getsize(unique_output_path) == 0:
+            raise Exception(f"Output file is empty: {unique_output_path}")
 
         return Path(unique_output_path)
