@@ -19,6 +19,11 @@ def download_weights(url, dest):
     print("downloading took: ", time.time() - start)
 
 class Predictor(BasePredictor):
+    test_inputs = {
+        "video": ".",
+        "audio": ".",
+    }
+
     def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient"""
         # Download the model weights
