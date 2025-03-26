@@ -24,5 +24,5 @@ RUN sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
 # Copy seluruh source code
 COPY . .
 
-# Jalankan script (ganti jika pakai cog)
-CMD ["python3", "predict.py"]
+# Dengan ini, agar cocok dengan config cog.yaml:
+ENTRYPOINT ["cog", "serve"]
