@@ -1,8 +1,12 @@
 FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
+# Set timezone dan suppress interaksi dialog
+ENV TZ=Asia/Jakarta
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install Python dan sistem package
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
-    python3 python3-pip ffmpeg libgl1 git tzdata \
+RUN apt-get update && apt-get install -y \
+    tzdata python3 python3-pip ffmpeg libgl1 git \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && ln -s /usr/bin/pip3 /usr/bin/pip \
     && rm -rf /var/lib/apt/lists/*
