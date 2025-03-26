@@ -1,8 +1,8 @@
 FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
 # Install Python dan sistem package
-RUN apt-get update && apt-get install -y \
-    python3 python3-pip ffmpeg libgl1 git \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
+    python3 python3-pip ffmpeg libgl1 git tzdata \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && ln -s /usr/bin/pip3 /usr/bin/pip \
     && rm -rf /var/lib/apt/lists/*
@@ -14,5 +14,3 @@ RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt
 # Salin semua kode ke container
 COPY . /code
 WORKDIR /code
-
-# Jalankan dengan cog
