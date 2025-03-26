@@ -12,7 +12,7 @@ RUN apt update && \
 
 # Copy dan install python requirements
 COPY requirements.txt /code/requirements.txt
-RUN pip install --upgrade pip && pip install -r /code/requirements.txt
+RUN pip3 install --upgrade pip && pip3 install -r /code/requirements.txt
 
 # Copy semua kode ke dalam container
 COPY . /code
