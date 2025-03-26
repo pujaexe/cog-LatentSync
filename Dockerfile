@@ -1,8 +1,8 @@
 FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
-# Set timezone dan suppress interaksi dialog
-ENV TZ=Asia/Jakarta
+# Set timezone & suppress dialog
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Jakarta
 
 # Install Python dan sistem package
 RUN apt-get update && apt-get install -y \
