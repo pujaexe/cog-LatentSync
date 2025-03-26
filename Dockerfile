@@ -15,7 +15,10 @@ RUN apt-get update && \
     git && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /usr/bin/python3 /usr/bin/python && \
-    ln -sf /usr/bin/pip3 /usr/bin/pip
+    ln -sf /usr/bin/pip3 /usr/bin/pip && \
+    pip install --upgrade pip && \
+    pip install -r /tmp/requirements.txt
+
 
 # Copy dan install Python dependencies
 COPY requirements.txt /tmp/requirements.txt
