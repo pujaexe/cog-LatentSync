@@ -28,4 +28,4 @@ RUN python -m pip install --upgrade pip && \
 COPY . .
 
 # Jalankan cog sesuai config
-ENTRYPOINT ["cog", "serve"]
+ENTRYPOINT ["which", "cog"]
