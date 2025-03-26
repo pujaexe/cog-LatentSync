@@ -1,28 +1,17 @@
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+FROM r8.im/cog/cog:py310-cu118-ubuntu20.04
 
-# Supaya tidak macet saat install
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Asia/Jakarta
-
-# Install dependencies sistem
-RUN apt update && \
-    apt install -y python3 python3-pip python3-dev \
-    build-essential git ffmpeg cmake \
-    && ln -sf /usr/bin/python3 /usr/bin/python \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set direktori kerja
+# Install Python dependencies from requirements.txt
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt
+
+# Copy entire repo
+COPY . /code
 WORKDIR /code
 
-# Copy requirements dan install
-COPY requirements.txt .
-# Fix numpy: gunakan versi kompatibel dengan Python 3.8
-RUN sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
-    python3 -m pip install --upgrade pip && \
-    python3 -m pip install -r requirements.txt
-
-# Copy seluruh source code
-COPY . .
-
-# Jalankan script (ganti jika pakai cog)
-CMD ["python3", "predict.py"]
+# Cog will handle `predict.py` and serving logic
