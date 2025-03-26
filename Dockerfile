@@ -1,22 +1,25 @@
 FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
-# Supaya tidak macet saat install tzdata
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Asia/Jakarta
-
-# Install Python, pip, git, ffmpeg, dan timezone fix
+# Install dependencies OS
 RUN apt update && \
-    apt install -y tzdata python3-pip git ffmpeg && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
-    rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive apt install -y \
+    python3 python3-pip python3-dev \
+    build-essential git ffmpeg cmake \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && ln -s /usr/bin/pip3 /usr/bin/pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy dan install python requirements
-COPY requirements.txt /code/requirements.txt
-RUN pip3 install --upgrade pip && pip3 install -r /code/requirements.txt
+# Set working dir
+WORKDIR /app
 
-# Copy semua kode ke dalam container
-COPY . /code
-WORKDIR /code
+# Copy requirements first (agar cache tidak hilang)
+COPY requirements.txt .
 
-# Jalankan inference server (ganti jika pakai cog)
+# Install Python dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy all source code
+COPY . .
+
+# Default command
 CMD ["python", "predict.py"]
