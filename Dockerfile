@@ -19,7 +19,9 @@ COPY requirements.txt .
 # Fix numpy: gunakan versi kompatibel dengan Python 3.8
 RUN sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
     python3 -m pip install --upgrade pip && \
+    pip install cog && \
     python3 -m pip install -r requirements.txt
+    
 
 # Copy seluruh source code
 COPY . .
