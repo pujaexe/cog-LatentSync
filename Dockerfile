@@ -1,29 +1,28 @@
 FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
-# Set timezone dan hindari interactive prompt
+# Supaya tidak macet saat install
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Jakarta
 
-# Install Python, pip, git, dan dependencies sistem
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    tzdata \
-    python3 \
-    python3-pip \
-    git \
-    ffmpeg \
-    libgl1 \
-    && ln -sf /usr/bin/python3 /usr/bin/python && \
-    ln -sf /usr/bin/pip3 /usr/bin/pip && \
-    rm -rf /var/lib/apt/lists/*
+# Install dependencies sistem
+RUN apt update && \
+    apt install -y python3 python3-pip python3-dev \
+    build-essential git ffmpeg cmake \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
+    && rm -rf /var/lib/apt/lists/*
 
-# Salin requirements.txt terlebih dahulu
-COPY requirements.txt /tmp/requirements.txt
-
-# Install Python dependencies
-RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir -r /tmp/requirements.txt
-
-# Copy seluruh source code ke dalam container
-COPY . /code
+# Set direktori kerja
 WORKDIR /code
+
+# Copy requirements dan install
+COPY requirements.txt .
+# Fix numpy: gunakan versi kompatibel dengan Python 3.8
+RUN sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install -r requirements.txt
+
+# Copy seluruh source code
+COPY . .
+
+# Jalankan script (ganti jika pakai cog)
+CMD ["python3", "predict.py"]
