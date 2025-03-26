@@ -1,17 +1,18 @@
-FROM r8.im/cog/cog:py310-cu118-ubuntu20.04
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
-# Install system dependencies
+# Install Python dan sistem package
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    libgl1 \
+    python3 python3-pip ffmpeg libgl1 git \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && ln -s /usr/bin/pip3 /usr/bin/pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies from requirements.txt
+# Salin dan install dependencies
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt
 
-# Copy entire repo
+# Salin semua kode ke container
 COPY . /code
 WORKDIR /code
 
-# Cog will handle `predict.py` and serving logic
+# Jalankan dengan cog
