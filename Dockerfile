@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
 
 # Salin dan install Python dependencies
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt
+RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt
+
 
 # Salin semua kode
 COPY . /code
