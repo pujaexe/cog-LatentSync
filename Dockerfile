@@ -3,7 +3,7 @@ FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Jakarta
 
-# Install Python 3.10 dan tool
+# Install Python dan sistem dependencies
 RUN apt-get update && apt-get install -y \
     software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
@@ -14,14 +14,16 @@ RUN apt-get update && apt-get install -y \
     curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     rm -rf /var/lib/apt/lists/*
 
-# Install cog + requirements (global install)
+# Install cog dan requirements
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && \
     pip install cog && \
     sed -i 's/numpy==1.26.3/numpy==1.24.4/' /tmp/requirements.txt && \
     pip install -r /tmp/requirements.txt
 
+# Copy seluruh kode
 WORKDIR /code
 COPY . .
 
+# Jalankan cog
 ENTRYPOINT ["cog", "serve"]
