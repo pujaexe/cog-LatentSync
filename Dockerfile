@@ -1,10 +1,10 @@
 FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 
-# Supaya tidak macet saat install
+# Hindari interaktif prompt
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Jakarta
 
-# Install dependencies sistem
+# Install system packages
 RUN apt update && \
     apt install -y python3 python3-pip python3-dev \
     build-essential git ffmpeg cmake \
@@ -12,20 +12,23 @@ RUN apt update && \
     ln -sf /usr/bin/pip3 /usr/bin/pip && \
     rm -rf /var/lib/apt/lists/*
 
+# Set PATH tambahan jika pip install --user digunakan
+ENV PATH="/root/.local/bin:$PATH"
+
 # Set direktori kerja
 WORKDIR /code
 
-# Copy requirements dan install pip + cog dulu
+# Copy requirements file
 COPY requirements.txt .
 
-# Install pip dan cog sebelum install dependencies berat
+# Install pip + cog + semua requirements
 RUN python -m pip install --upgrade pip && \
-    pip install cog && \
+    pip install --user cog && \
     sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
-    pip install -r requirements.txt
+    pip install --user -r requirements.txt
 
-# Copy seluruh source code
+# Copy semua kode
 COPY . .
 
-# Jalankan cog sesuai config
+# Untuk verifikasi apakah cog sudah tersedia
 ENTRYPOINT ["which", "cog"]
