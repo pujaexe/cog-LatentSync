@@ -3,7 +3,6 @@ FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 # Hindari interaktif prompt
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Jakarta
-ENV PATH="/root/.local/bin:$PATH"
 
 # Install system packages
 RUN apt update && \
@@ -13,20 +12,20 @@ RUN apt update && \
     ln -sf /usr/bin/pip3 /usr/bin/pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Set direktori kerja
+# Set workdir
 WORKDIR /code
 
 # Copy requirements
 COPY requirements.txt .
 
-# Install dependencies
-RUN python -m pip install --upgrade pip && \
-    pip install --user cog && \
+# Install pip & cog & project dependencies
+RUN pip install --upgrade pip && \
+    pip install cog && \                      # << INSTALL GLOBAL
     sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
-    pip install --user -r requirements.txt
+    pip install -r requirements.txt
 
-# Copy semua kode
+# Copy kode
 COPY . .
 
-# Jalankan cog API (untuk request seperti replicate)
+# Jalankan cog API
 ENTRYPOINT ["cog", "serve"]
