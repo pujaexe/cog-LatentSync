@@ -1,11 +1,9 @@
 FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 
-# 1. Hindari prompt interaktif
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Jakarta
-ENV PATH="/root/.local/bin:$PATH"
 
-# 2. Install Python 3.10 dan sistem packages
+# Install Python 3.10 dan tool
 RUN apt-get update && apt-get install -y \
     software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
@@ -16,16 +14,14 @@ RUN apt-get update && apt-get install -y \
     curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     rm -rf /var/lib/apt/lists/*
 
-# 3. Install cog dan requirements
+# Install cog + requirements (global install)
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && \
     pip install cog && \
     sed -i 's/numpy==1.26.3/numpy==1.24.4/' /tmp/requirements.txt && \
     pip install -r /tmp/requirements.txt
 
-# 4. Copy semua kode
 WORKDIR /code
 COPY . .
 
-# 5. Jalankan cog serve
 ENTRYPOINT ["cog", "serve"]
