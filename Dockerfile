@@ -7,8 +7,10 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install Python dependencies
-RUN pip install --upgrade pip
+# Upgrade pip and setuptools
+RUN pip install --upgrade pip setuptools
+
+# Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
