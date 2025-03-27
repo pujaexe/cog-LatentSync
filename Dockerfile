@@ -14,14 +14,14 @@ RUN apt-get update && apt-get install -y \
     curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     rm -rf /var/lib/apt/lists/*
 
-# Install cog dan requirements
+# Install cog dan requirements (tanpa --user)
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && \
     pip install cog && \
     sed -i 's/numpy==1.26.3/numpy==1.24.4/' /tmp/requirements.txt && \
     pip install -r /tmp/requirements.txt
 
-# Copy seluruh kode
+# Copy kode
 WORKDIR /code
 COPY . .
 
