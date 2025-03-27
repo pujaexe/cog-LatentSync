@@ -1,31 +1,31 @@
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 
-# Hindari interaktif prompt
+# 1. Hindari prompt interaktif
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Jakarta
+ENV PATH="/root/.local/bin:$PATH"
 
-# Install system packages
-RUN apt update && \
-    apt install -y python3 python3-pip python3-dev \
-    build-essential git ffmpeg cmake \
-    && ln -sf /usr/bin/python3 /usr/bin/python && \
-    ln -sf /usr/bin/pip3 /usr/bin/pip && \
+# 2. Install Python 3.10 dan sistem packages
+RUN apt-get update && apt-get install -y \
+    software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && apt-get install -y \
+    python3.10 python3.10-dev python3.10-distutils \
+    build-essential git ffmpeg cmake libgl1 curl && \
+    ln -sf /usr/bin/python3.10 /usr/bin/python && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     rm -rf /var/lib/apt/lists/*
 
-# Set workdir
-WORKDIR /code
-
-# Copy requirements
-COPY requirements.txt .
-
-# Install pip & cog & project dependencies
+# 3. Install cog dan requirements
+COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && \
-    pip install cog && \                      # << INSTALL GLOBAL
-    sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
-    pip install -r requirements.txt
+    pip install cog && \
+    sed -i 's/numpy==1.26.3/numpy==1.24.4/' /tmp/requirements.txt && \
+    pip install -r /tmp/requirements.txt
 
-# Copy kode
+# 4. Copy semua kode
+WORKDIR /code
 COPY . .
 
-# Jalankan cog API
+# 5. Jalankan cog serve
 ENTRYPOINT ["cog", "serve"]
