@@ -1,34 +1,26 @@
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+FROM python:3.8-slim-buster
 
-# Hindari interaktif prompt
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Asia/Jakarta
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install system packages
-RUN apt update && \
-    apt install -y python3 python3-pip python3-dev \
-    build-essential git ffmpeg cmake \
-    && ln -sf /usr/bin/python3 /usr/bin/python && \
-    ln -sf /usr/bin/pip3 /usr/bin/pip && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set PATH tambahan jika pip install --user digunakan
-ENV PATH="/root/.local/bin:$PATH"
-
-# Set direktori kerja
-WORKDIR /code
-
-# Copy requirements file
+# Upgrade pip and install Python dependencies
+RUN pip install --upgrade pip
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Install pip + cog + semua requirements
-RUN python -m pip install --upgrade pip && \
-    pip install --user cog && \
-    sed -i 's/numpy==1.26.3/numpy==1.24.4/' requirements.txt && \
-    pip install --user -r requirements.txt
+# Install FastAPI and Uvicorn
+RUN pip install fastapi uvicorn cog
 
-# Copy semua kode
-COPY . .
+# Copy application files
+COPY . /app
+WORKDIR /app
 
-# Untuk verifikasi apakah cog sudah tersedia
-ENTRYPOINT ["which", "cog"]
+# Expose port 8080
+EXPOSE 8080
+
+# Command to run the API
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080"]
