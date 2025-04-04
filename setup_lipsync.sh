@@ -2,10 +2,6 @@
 
 set -e  # Stop on error
 
-echo "🚀 Cloning repo..."
-git clone https://github.com/pujaexe/cog-LatentSync.git
-cd cog-LatentSync/
-
 echo "🐍 Upgrading pip & installing Python packages..."
 pip install --upgrade pip
 pip install -r requirements.txt
